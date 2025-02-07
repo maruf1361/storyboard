@@ -20,21 +20,21 @@ export async function POST(req) {
             }
             .bubble-text {
               font-family: 'Comic Sans MS', cursive;
-              font-size: 12px;
+              font-size: 24px;
               white-space: pre-wrap;
-              inline-size: 80px;
+              inline-size: 160px;
               text-align: center;
             }
           </style>
         </defs>
         ${dialogues?.map(d => {
-          // Split text into lines (roughly 15 chars per line)
+          // Split text into lines (roughly 20 chars per line)
           const words = d.text.split(' ');
           let lines = [];
           let currentLine = '';
           
           words.forEach(word => {
-            if ((currentLine + ' ' + word).length > 15) {
+            if ((currentLine + ' ' + word).length > 20) {
               lines.push(currentLine);
               currentLine = word;
             } else {
@@ -47,31 +47,31 @@ export async function POST(req) {
 
           // Calculate bubble size based on text length
           const lineCount = lines.length;
-          const bubbleHeight = Math.max(40, lineCount * 15 + 20); // min height 40px
-          const bubbleWidth = Math.max(80, Math.min(120, d.text.length * 5)); // min 80px, max 120px
+          const bubbleHeight = Math.max(80, lineCount * 30 + 40);
+          const bubbleWidth = Math.max(160, Math.min(240, d.text.length * 10));
 
           return `
             <g transform="translate(${d.position.x * 10.24}, ${d.position.y * 10.24})">
               <filter id="shadow${d.position.x}" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/>
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
               </filter>
               <path d="M -${bubbleWidth/2} -${bubbleHeight/2} 
                        H ${bubbleWidth/2} 
-                       Q ${bubbleWidth/2 + 10} -${bubbleHeight/2} ${bubbleWidth/2 + 10} -${bubbleHeight/2 - 10} 
-                       V ${bubbleHeight/2 - 10} 
-                       Q ${bubbleWidth/2 + 10} ${bubbleHeight/2} ${bubbleWidth/2} ${bubbleHeight/2} 
+                       Q ${bubbleWidth/2 + 20} -${bubbleHeight/2} ${bubbleWidth/2 + 20} -${bubbleHeight/2 - 20} 
+                       V ${bubbleHeight/2 - 20} 
+                       Q ${bubbleWidth/2 + 20} ${bubbleHeight/2} ${bubbleWidth/2} ${bubbleHeight/2} 
                        H -${bubbleWidth/2} 
-                       Q -${bubbleWidth/2 + 10} ${bubbleHeight/2} -${bubbleWidth/2 + 10} ${bubbleHeight/2 - 10} 
-                       V -${bubbleHeight/2 - 10} 
-                       Q -${bubbleWidth/2 + 10} -${bubbleHeight/2} -${bubbleWidth/2} -${bubbleHeight/2} Z" 
+                       Q -${bubbleWidth/2 + 20} ${bubbleHeight/2} -${bubbleWidth/2 + 20} ${bubbleHeight/2 - 20} 
+                       V -${bubbleHeight/2 - 20} 
+                       Q -${bubbleWidth/2 + 20} -${bubbleHeight/2} -${bubbleWidth/2} -${bubbleHeight/2} Z" 
                     fill="white" 
                     filter="url(#shadow${d.position.x})"
               />
-              <path d="M -5 ${bubbleHeight/2} L 0 ${bubbleHeight/2 + 10} L 5 ${bubbleHeight/2}" fill="white"/>
+              <path d="M -10 ${bubbleHeight/2} L 0 ${bubbleHeight/2 + 20} L 10 ${bubbleHeight/2}" fill="white"/>
               ${lines.map((line, i) => `
                 <text 
                   x="0" 
-                  y="${-bubbleHeight/2 + 20 + (i * 15)}"
+                  y="${-bubbleHeight/2 + 40 + (i * 30)}"
                   text-anchor="middle" 
                   class="bubble-text"
                   fill="black"
@@ -88,7 +88,7 @@ export async function POST(req) {
           let currentLine = '';
           
           words.forEach(word => {
-            if ((currentLine + ' ' + word).length > 15) {
+            if ((currentLine + ' ' + word).length > 20) {
               lines.push(currentLine);
               currentLine = word;
             } else {
@@ -100,12 +100,12 @@ export async function POST(req) {
           }
 
           const lineCount = lines.length;
-          const bubbleSize = Math.max(40, Math.min(80, lineCount * 15 + 20));
+          const bubbleSize = Math.max(80, Math.min(160, lineCount * 30 + 40));
 
           return `
             <g transform="translate(${t.position.x * 10.24}, ${t.position.y * 10.24})">
               <filter id="thoughtShadow${t.position.x}" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/>
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
               </filter>
               <circle 
                 cx="0" 
@@ -114,13 +114,13 @@ export async function POST(req) {
                 fill="white" 
                 filter="url(#thoughtShadow${t.position.x})"
               />
-              <circle cx="0" cy="${bubbleSize/2 + 15}" r="5" fill="white"/>
-              <circle cx="0" cy="${bubbleSize/2 + 25}" r="3" fill="white"/>
-              <circle cx="0" cy="${bubbleSize/2 + 33}" r="2" fill="white"/>
+              <circle cx="0" cy="${bubbleSize/2 + 30}" r="10" fill="white"/>
+              <circle cx="0" cy="${bubbleSize/2 + 50}" r="6" fill="white"/>
+              <circle cx="0" cy="${bubbleSize/2 + 66}" r="4" fill="white"/>
               ${lines.map((line, i) => `
                 <text 
                   x="0" 
-                  y="${-bubbleSize/2 + 20 + (i * 15)}"
+                  y="${-bubbleSize/2 + 40 + (i * 30)}"
                   text-anchor="middle" 
                   class="bubble-text"
                   fill="black"
