@@ -38,12 +38,7 @@ export default function Navbar() {
             >
               Pricing
             </Link>
-            <Link 
-              href="/docs" 
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Docs
-            </Link>
+            
             <Button 
               size="sm" 
               variant="outline"

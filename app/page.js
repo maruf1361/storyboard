@@ -8,7 +8,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
       {/* Hero Section */}
-      <section className="py-12 sm:py-20 px-4 md:px-6 lg:px-8">
+      <section className="py-8 sm:py-20 px-4 md:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <div className="space-y-6">
             <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-gray-900 leading-tight">
@@ -39,7 +39,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-20 border-t border-gray-100">
+      <section className="py-8 sm:py-20 border-t border-gray-100">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="space-y-8 sm:space-y-12">
             <div className="space-y-3">
@@ -70,7 +70,7 @@ export default function Home() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-12 sm:py-20 border-t border-gray-100">
+      <section className="py-8 sm:py-20 border-t border-gray-100">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             <div className="py-4 sm:py-0">
@@ -90,7 +90,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-20 border-t border-gray-100">
+      <section className="py-8 sm:py-20 border-t border-gray-100">
         <div className="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center space-y-6">
             <h2 className="text-xl sm:text-2xl font-medium text-gray-900">

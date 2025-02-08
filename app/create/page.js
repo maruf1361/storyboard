@@ -2,19 +2,19 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ArrowRight, Sparkles, AlertCircle, MessageCircle, Brain, GripHorizontal, PlusCircle, Trash2, Grid, AlignJustify, Download, ImageIcon, Loader2 } from "lucide-react";
+import { ArrowRight, Sparkles, AlertCircle, MessageCircle, Brain, GripHorizontal, PlusCircle, Trash2, Grid, AlignJustify, Download, ImageIcon, Loader2, LayoutGrid, LayoutList } from "lucide-react";
 import Image from "next/image";
 import html2canvas from 'html2canvas';
 
 const BubbleStyle = {
-  normal: "rounded-xl border-2",
-  shout: "rounded-lg border-4 bg-yellow-50",
-  whisper: "rounded-3xl border border-dashed",
-  think: "rounded-full",
-  electronic: "polygon-[75%_0,_100%_50%,_75%_100%,_0_100%,_25%_50%,_0_0]",
-  emphasis: "rounded-lg border-4",
-  cloud: "path-[M3,0 L7,0 C8,0 9,1 9,2 L9,8 C9,9 8,10 7,10 L3,10 C2,10 1,9 1,8 L1,2 C1,1 2,0 3,0 Z]",
-  spiral: "rounded-full",
+  normal: "rounded-xl border-2 border-gray-900 bg-white shadow-comic",
+  shout: "rounded-lg border-4 border-gray-900 bg-yellow-50 shadow-comic",
+  whisper: "rounded-3xl border border-dashed border-gray-900 bg-white shadow-comic",
+  think: "rounded-full border-2 border-gray-900 bg-white shadow-comic",
+  electronic: "clip-path-hex border-2 border-gray-900 bg-white shadow-comic",
+  emphasis: "rounded-lg border-4 border-gray-900 bg-white shadow-comic",
+  cloud: "bubble-cloud border-2 border-gray-900 bg-white shadow-comic",
+  spiral: "rounded-full border-2 border-gray-900 bg-white shadow-comic",
 };
 
 const SpeechBubble = ({ 
@@ -153,68 +153,79 @@ const SpeechBubble = ({
     }
   };
 
+  // Update bubble style to ensure text fits in thought bubbles
   const bubbleStyle = {
     position: 'absolute',
     left: `${pos.x}%`,
     top: `${pos.y}%`,
     transform: 'translate(-50%, -50%)',
     cursor: isDragging ? 'grabbing' : 'grab',
-    maxWidth: '40%',
-    padding: '0.5rem 1rem',
+    maxWidth: '25%',
+    padding: '0.35rem 0.5rem',
     backgroundColor: 'white',
-    borderRadius: '1.5rem',
-    fontSize: '0.75rem',
-    lineHeight: '1.2',
+    fontSize: type === 'thought' ? '0.65rem' : '0.75rem',
+    lineHeight: '1.1',
     zIndex: isDragging ? 50 : 10,
     userSelect: 'none',
-    transition: isDragging ? 'none' : 'box-shadow 0.2s',
-    boxShadow: isDragging 
-      ? 'rgba(0, 0, 0, 0.2) 0px 8px 16px'
-      : 'rgba(0, 0, 0, 0.1) 0px 2px 4px',
-    fontFamily: 'var(--font-comic)',
+    transition: isDragging ? 'none' : 'all 0.2s',
+    fontFamily: 'Comic Neue, "Comic Sans MS", cursive',
     fontWeight: style === 'shout' ? 700 : 400,
-    textTransform: style === 'shout' ? 'uppercase' : 'none',
-    letterSpacing: style === 'whisper' ? '0.05em' : 'normal',
-    clipPath: type === 'dialogue' ? 
-      'path("M 0,10 C 0,4.477 4.477,0 10,0 H calc(100% - 10) C calc(100% - 4.477),0 100%,4.477 100%,10 V calc(100% - 10) C 100%,calc(100% - 4.477) calc(100% - 4.477),100% calc(100% - 10),100% H 10 C 4.477,100% 0,calc(100% - 4.477) 0,calc(100% - 10) Z")' : 
-      'none',
+    letterSpacing: style === 'whisper' ? '0.05em' : '0.025em',
+    border: '1.5px solid #111827',
+    boxShadow: isDragging 
+      ? '2px 2px 0 rgba(17, 24, 39, 0.9)'
+      : '1px 1px 0 rgba(17, 24, 39, 0.9)',
+    wordBreak: 'break-word',
+    whiteSpace: 'pre-wrap',
+    ...(type === 'thought' && {
+      width: 'auto',
+      minWidth: '45px',
+      maxWidth: '120px',
+      aspectRatio: '1/1',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      padding: '0.5rem',
+    }),
   };
 
-  // For thought bubbles, add circular indicators
+  // Update thought bubble indicators to be smaller
   const thoughtBubbleStyle1 = {
-    position: 'absolute',
-    width: '10px',
-    height: '10px',
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    bottom: '-12px',  // Moved closer to bubble
-    left: '50%',
-    transform: 'translateX(-50%)',
-    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 4px',
-  };
-
-  const thoughtBubbleStyle2 = {
-    position: 'absolute',
-    width: '6px',
-    height: '6px',
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    bottom: '-20px',  // Adjusted spacing
-    left: '50%',
-    transform: 'translateX(-50%)',
-    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 4px',
-  };
-
-  const thoughtBubbleStyle3 = {
     position: 'absolute',
     width: '4px',
     height: '4px',
     backgroundColor: 'white',
     borderRadius: '50%',
-    bottom: '-26px',  // Adjusted spacing
+    bottom: '-8px',
     left: '50%',
     transform: 'translateX(-50%)',
-    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 4px',
+    border: '1.5px solid #111827',
+  };
+
+  const thoughtBubbleStyle2 = {
+    position: 'absolute',
+    width: '3px',
+    height: '3px',
+    backgroundColor: 'white',
+    borderRadius: '50%',
+    bottom: '-12px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    border: '1.5px solid #111827',
+  };
+
+  const thoughtBubbleStyle3 = {
+    position: 'absolute',
+    width: '2px',
+    height: '2px',
+    backgroundColor: 'white',
+    borderRadius: '50%',
+    bottom: '-15px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    border: '1.5px solid #111827',
   };
 
   // Only render tail/indicators for dialogue and thought bubbles
@@ -275,83 +286,51 @@ const SpeechBubble = ({
     <div
       ref={bubbleRef}
       data-bubble={type}
-      style={{
-        position: 'absolute',
-        left: `${pos.x}%`,
-        top: `${pos.y}%`,
-        transform: 'translate(-50%, -50%)',
-        cursor: isDragging ? 'grabbing' : 'grab',
-        userSelect: 'none',
-        zIndex: isSelected ? 30 : 20,
-        pointerEvents: 'auto',
-        maxWidth: '200px',
-        minWidth: '100px',
-      }}
-      onMouseDown={(e) => {
-        if (e.detail === 1) { // Single click
-          onSelect?.();
-        }
-        handleMouseDown(e);
-      }}
+      style={bubbleStyle}
+      className={`${BubbleStyle[style]} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
-      className={`bg-white p-2 shadow-sm ${BubbleStyle[style]} 
-        ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
     >
       {isEditing ? (
         <textarea
-          autoFocus
           value={text}
           onChange={handleTextChange}
           onBlur={handleBlur}
-          className="bg-transparent resize-none outline-none w-full font-comic overflow-hidden"
-          style={{ 
+          className="bg-transparent resize-none outline-none w-full"
+          autoFocus
+          style={{
             height: 'auto',
-            minHeight: '1.2em',
-            fontFamily: 'var(--font-comic)',
-            fontSize: type === 'dialogue' ? '0.875rem' : '0.75rem',
-            fontWeight: style === 'shout' ? 700 : 400,
+            minHeight: '1.1em',
+            fontFamily: 'Comic Neue, "Comic Sans MS", cursive',
+            fontSize: type === 'thought' ? '0.65rem' : '0.75rem',
+            textAlign: type === 'thought' ? 'center' : 'left',
+            letterSpacing: '0.025em',
+            lineHeight: '1.1',
           }}
-          onFocus={(e) => adjustTextareaHeight(e.target)}
         />
       ) : (
         <div 
-          style={{
-            textAlign: style === 'shout' ? 'center' : 'left',
-            fontStyle: type === 'thought' ? 'italic' : 'normal',
+          style={{ 
             wordBreak: 'break-word',
-            whiteSpace: 'pre-wrap',
+            width: '100%',
+            textAlign: type === 'thought' ? 'center' : 'left',
+            fontSize: type === 'thought' ? '0.65rem' : '0.75rem',
+            fontFamily: 'Comic Neue, "Comic Sans MS", cursive',
+            letterSpacing: '0.025em',
+            lineHeight: '1.1',
           }}
-          onDoubleClick={handleDoubleClick}
         >
           {text}
         </div>
       )}
       
-      {showIndicator && (
-        type === 'dialogue' ? (
-          <div 
-            ref={indicatorRef}
-            className="dialogue-tail"
-            style={indicatorStyle}
-            onMouseDown={handleIndicatorMouseDown}
-          />
-        ) : (
-          <div 
-            ref={indicatorRef}
-            style={indicatorStyle}
-            onMouseDown={handleIndicatorMouseDown}
-          >
-            <div style={thoughtBubbleStyle1} />
-            <div style={thoughtBubbleStyle2} />
-            <div style={thoughtBubbleStyle3} />
-          </div>
-        )
+      {type === 'thought' && (
+        <>
+          <div style={thoughtBubbleStyle1} />
+          <div style={thoughtBubbleStyle2} />
+          <div style={thoughtBubbleStyle3} />
+        </>
       )}
-
-      {/* Drag hint */}
-      <div className="absolute -top-5 left-0 w-full text-center text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-        Drag to move
-      </div>
     </div>
   );
 };
@@ -422,7 +401,7 @@ const LoadingPanel = ({ index, total }) => {
         <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
         <div className="space-y-2 text-center">
           <p className="text-sm font-medium text-gray-900">
-            Generating panel {index + 1} of {total}
+            
           </p>
           <p className="text-xs text-gray-500">
             This might take a minute due to rate limits...
@@ -440,6 +419,62 @@ const LoadingPanel = ({ index, total }) => {
   );
 };
 
+// Update ComicImage component to handle CORS
+const ComicImage = ({ src, alt, width, height }) => {
+  const [error, setError] = useState(false);
+
+  return (
+    <>
+      {!error ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          className="w-full h-auto rounded-md"
+          onError={() => setError(true)}
+          priority
+          unoptimized // Add this to bypass image optimization
+          crossOrigin="anonymous" // Add this for CORS
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-md">
+          <div className="text-center p-4">
+            <ImageIcon className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-500">Image no longer available</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+// Add this SVG arrow component
+const DialogueTail = ({ angle }) => (
+  <svg 
+    width="20" 
+    height="20" 
+    viewBox="0 0 20 20" 
+    className="dialogue-tail"
+    style={{
+      position: 'absolute',
+      left: '50%',
+      bottom: '-20px',
+      transform: `translateX(-50%) rotate(${angle}deg)`,
+      transformOrigin: 'top center',
+      cursor: 'grab',
+      zIndex: 5,
+    }}
+  >
+    <path 
+      d="M10 0 L20 20 L0 20 Z" 
+      fill="white" 
+      stroke="#111827" 
+      strokeWidth="2"
+    />
+  </svg>
+);
+
 export default function CreatePage() {
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState('manga');
@@ -448,77 +483,133 @@ export default function CreatePage() {
   const [error, setError] = useState('');
   const [generatedPanels, setGeneratedPanels] = useState([]);
   const [selectedPanel, setSelectedPanel] = useState(null);
-  const [isGridLayout, setIsGridLayout] = useState(true);
-  const [selectedBubble, setSelectedBubble] = useState(null); // { panelIndex, type, bubbleIndex }
-  const [editingBubble, setEditingBubble] = useState(null);
+  const [selectedBubble, setSelectedBubble] = useState(null);
+  const [layout, setLayout] = useState('grid'); // 'grid' or 'row'
 
-  const handleSave = async (type = 'grid') => {
-    if (!generatedPanels?.length) return;
+  const handleSave = async () => {
+    if (!generatedPanels?.length || !generatedPanels[0]?.url) return;
 
     try {
-      if (type === 'grid') {
-        // Get the grid container element
-        const gridContainer = document.querySelector('.grid');
-        if (!gridContainer) return;
+      const comicContainer = document.querySelector('.comic-container');
+      
+      const canvas = await html2canvas(comicContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        onclone: (clonedDoc) => {
+          // Hide controls
+          const controlButtons = clonedDoc.querySelectorAll('.bubble-controls');
+          controlButtons.forEach(button => {
+            button.style.display = 'none';
+          });
 
-        // Temporarily hide delete buttons
-        const deleteButtons = gridContainer.querySelectorAll('.delete-button');
-        deleteButtons.forEach(button => button.style.display = 'none');
+          // Handle bubbles
+          const bubbles = clonedDoc.querySelectorAll('[data-bubble]');
+          bubbles.forEach(bubble => {
+            const originalBubble = document.querySelector(
+              `[data-bubble="${bubble.dataset.bubble}"][style*="left: ${bubble.style.left}"]`
+            );
+            
+            if (originalBubble) {
+              const originalRect = originalBubble.getBoundingClientRect();
+              
+              // Apply base styles with smaller dimensions
+              bubble.style.position = 'absolute';
+              bubble.style.left = originalBubble.style.left;
+              bubble.style.top = originalBubble.style.top;
+              bubble.style.transform = originalBubble.style.transform;
+              bubble.style.fontFamily = 'Comic Neue, "Comic Sans MS", cursive';
+              bubble.style.border = '1.5px solid #111827';
+              bubble.style.backgroundColor = 'white';
+              bubble.style.maxWidth = '25%'; // Reduced from original size
 
-        // Capture the grid
-        const canvas = await html2canvas(gridContainer, {
-          backgroundColor: null,
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-        });
+              // Handle thought bubbles specifically
+              if (bubble.dataset.bubble === 'thought') {
+                const textContent = bubble.querySelector('div');
+                const text = textContent.textContent;
+                
+                // Set smaller dimensions for thought bubbles
+                const baseSize = Math.min(originalRect.width * 0.8, 100); // 80% of original, max 100px
+                bubble.style.width = `${baseSize}px`;
+                bubble.style.height = `${baseSize}px`;
+                bubble.style.borderRadius = '50%';
+                bubble.style.display = 'flex';
+                bubble.style.alignItems = 'center';
+                bubble.style.justifyContent = 'center';
+                bubble.style.padding = '0.35rem';
+                
+                // Style the text container
+                if (textContent) {
+                  textContent.style.width = '100%';
+                  textContent.style.textAlign = 'center';
+                  textContent.style.fontSize = '0.65rem';
+                  textContent.style.lineHeight = '1.1';
+                  textContent.style.wordBreak = 'break-word';
+                  textContent.style.whiteSpace = 'pre-wrap';
+                  textContent.style.margin = '0';
+                  textContent.style.padding = '0'; // Reset padding
+                  textContent.style.display = 'flex';
+                  textContent.style.alignItems = 'center';
+                  textContent.style.justifyContent = 'center';
+                  textContent.style.height = '100%';
+                }
 
-        // Restore delete buttons
-        deleteButtons.forEach(button => button.style.display = '');
+                // Handle thought indicators with smaller sizes
+                const indicators = originalBubble.querySelectorAll('div[style*="border-radius: 50%"]');
+                const clonedIndicators = bubble.querySelectorAll('div[style*="border-radius: 50%"]');
+                
+                indicators.forEach((indicator, index) => {
+                  if (clonedIndicators[index]) {
+                    clonedIndicators[index].style.position = 'absolute';
+                    clonedIndicators[index].style.borderRadius = '50%';
+                    clonedIndicators[index].style.backgroundColor = 'white';
+                    clonedIndicators[index].style.border = '1.5px solid #111827';
+                    clonedIndicators[index].style.width = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                    clonedIndicators[index].style.height = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                    clonedIndicators[index].style.bottom = index === 0 ? '-8px' : index === 1 ? '-12px' : '-15px';
+                    clonedIndicators[index].style.left = '50%';
+                    clonedIndicators[index].style.transform = 'translateX(-50%)';
+                  }
+                });
+              } else {
+                // Handle regular dialogue bubbles with smaller dimensions
+                const width = Math.min(originalRect.width * 0.8, originalRect.width); // 80% of original width
+                bubble.style.width = `${width}px`;
+                bubble.style.height = 'auto';
+                bubble.style.padding = '0.35rem 0.5rem';
+                bubble.style.borderRadius = '0.5rem';
 
-        // Convert and download
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'comic-grid.png';
-          a.click();
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      } else {
-        // Individual panel save
-        const selectedPanelData = generatedPanels[selectedPanel];
-        if (!selectedPanelData) return;
+                const textElement = bubble.querySelector('div');
+                if (textElement) {
+                  textElement.style.width = '100%';
+                  textElement.style.textAlign = 'left';
+                  textElement.style.fontSize = '0.65rem';
+                  textElement.style.lineHeight = '1.1';
+                  textElement.style.wordBreak = 'break-word';
+                  textElement.style.whiteSpace = 'pre-wrap';
+                  textElement.style.fontFamily = 'Comic Neue, "Comic Sans MS", cursive';
+                }
+              }
+            }
+          });
+        }
+      });
 
-        const response = await fetch('/api/capture', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageUrl: selectedPanelData.url,
-            dialogues: selectedPanelData.dialogues || [],
-            thoughts: selectedPanelData.thoughts || [],
-          }),
-        });
-
-        if (!response.ok) throw new Error('Failed to capture panel');
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `panel-${selectedPanel + 1}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'comic.png';
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Save error:', error);
+      setError('Failed to save comic');
     }
   };
 
   const handleGenerate = async () => {
+    setError(null);
     if (!prompt) return;
     
     setIsGenerating(true);
@@ -531,7 +622,6 @@ export default function CreatePage() {
         body: JSON.stringify({
           prompt,
           style,
-          panels,
         }),
       });
 
@@ -540,14 +630,17 @@ export default function CreatePage() {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
+      // Create proxied URLs for the images
       setGeneratedPanels(data.images.map(image => ({
         ...image,
+        url: `/api/proxy-image?url=${encodeURIComponent(image.url)}`,
         dialogues: [],
         thoughts: [],
       })));
+
     } catch (error) {
       console.error('Generation error:', error);
-      // You might want to show an error message to the user here
+      setError(error.message);
     } finally {
       setIsGenerating(false);
     }
@@ -583,18 +676,12 @@ export default function CreatePage() {
 
   const deleteBubble = (panelIndex, type, bubbleIndex) => {
     const updatedPanels = [...generatedPanels];
-    const panel = updatedPanels[panelIndex];
-    
-    if (type === 'dialogue' && Array.isArray(panel.dialogues)) {
-      // Remove the specific dialogue bubble
-      panel.dialogues = panel.dialogues.filter((_, index) => index !== bubbleIndex);
-    } else if (type === 'thought' && Array.isArray(panel.thoughts)) {
-      // Remove the specific thought bubble
-      panel.thoughts = panel.thoughts.filter((_, index) => index !== bubbleIndex);
+    if (type === 'dialogue') {
+      updatedPanels[panelIndex].dialogues.splice(bubbleIndex, 1);
+    } else {
+      updatedPanels[panelIndex].thoughts.splice(bubbleIndex, 1);
     }
-
     setGeneratedPanels(updatedPanels);
-    setSelectedBubble(null); // Clear selection after deletion
   };
 
   const addDialogue = (panelIndex) => {
@@ -629,10 +716,34 @@ export default function CreatePage() {
     setGeneratedPanels(updatedPanels);
   };
 
-  const getLayoutClass = (totalPanels, isGridLayout) => {
-    // Always return single column since we're displaying one image
-    return "grid-cols-1 gap-4";
+  const getLayoutClass = (totalPanels, layout) => {
+    if (layout === 'row') {
+      return "flex flex-col gap-4 max-w-4xl mx-auto";
+    }
+    
+    return `grid ${
+      totalPanels === 4 ? 'grid-cols-2' :
+      totalPanels === 3 ? 'grid-cols-2' :
+      totalPanels === 2 ? 'grid-cols-2' :
+      'grid-cols-1'
+    } gap-4 max-w-4xl mx-auto`;
   };
+
+  // Add function to create empty panel placeholders
+  const createEmptyPanels = (count) => {
+    return Array(count).fill({
+      url: null,
+      dialogues: [],
+      thoughts: []
+    });
+  };
+
+  // Update panels state when panel count changes
+  useEffect(() => {
+    if (generatedPanels.length === 0) {
+      setGeneratedPanels(createEmptyPanels(panels));
+    }
+  }, [panels]);
 
   // Update the keyboard event handler for delete/backspace
   useEffect(() => {
@@ -675,347 +786,258 @@ export default function CreatePage() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      // Cleanup object URLs when component unmounts
+      generatedPanels.forEach(panel => {
+        if (panel.url && panel.url.startsWith('blob:')) {
+          URL.revokeObjectURL(panel.url);
+        }
+      });
+    };
+  }, []);
+
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Input Section */}
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-xl font-medium text-gray-900 mb-2">
-              Create your comic
-            </h1>
-            <p className="text-sm text-gray-600">
-              Describe your scene in detail. Include characters, actions, emotions, and setting.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {/* Style Selection */}
-            <div className="grid grid-cols-3 gap-2">
-              {['manga', 'comic', 'realistic'].map((styleOption) => (
-                <button
-                  key={styleOption}
-                  onClick={() => setStyle(styleOption)}
-                  className={`px-4 py-2 text-sm rounded-md border ${
-                    style === styleOption 
-                      ? 'border-gray-900 text-gray-900 bg-gray-50' 
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-                  {styleOption.charAt(0).toUpperCase() + styleOption.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Panel Count */}
-            <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => setPanels(num)}
-                  className={`px-4 py-2 text-sm rounded-md border ${
-                    panels === num 
-                      ? 'border-gray-900 text-gray-900 bg-gray-50' 
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-                  {num} {num === 1 ? 'Panel' : 'Panels'}
-                </button>
-              ))}
-            </div>
-
-            {/* Scene Description */}
-            <Textarea 
-              placeholder="A young hero standing on a rooftop at sunset, cape flowing in the wind..."
-              className="min-h-[200px] text-base resize-none"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
-
-            {error && (
-              <div className="text-red-500 text-sm flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                {error}
+    <div className="min-h-screen bg-white">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-2 gap-16">
+          {/* Input Section */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-medium text-gray-900">Create your story</h2>
+            <div className="space-y-5">
+              {/* Prompt Input */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Story prompt
+                </label>
+                <Textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Describe your story..."
+                  className="w-full min-h-[100px] text-sm rounded-md border-gray-200 focus:border-gray-300 focus:ring-0 placeholder:text-gray-400 resize-none transition-colors"
+                />
               </div>
-            )}
 
-            <Button 
-              className="w-full bg-black hover:bg-gray-900 text-white text-sm rounded
-                        transition-colors duration-200 flex items-center justify-center h-11"
-              onClick={handleGenerate}
-              disabled={!prompt.trim() || isGenerating}
-            >
-              {isGenerating ? (
-                <span className="flex items-center justify-center">
-                  <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
-                  Generating story...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  Generate comic <ArrowRight className="ml-2 h-4 w-4" />
-                </span>
-              )}
-            </Button>
-          </div>
-
-          {/* Tips Section */}
-          <div className="border-t border-gray-100 pt-6 space-y-4">
-            <h2 className="text-sm font-medium text-gray-900">Tips for {style} style</h2>
-            <ul className="text-sm text-gray-600 space-y-2">
-              {style === 'manga' && (
-                <>
-                  <li>• Use dynamic angles and expressive character emotions</li>
-                  <li>• Consider speed lines and impact frames</li>
-                  <li>• Think about panel layout and flow</li>
-                </>
-              )}
-              {style === 'comic' && (
-                <>
-                  <li>• Focus on bold, clear character designs</li>
-                  <li>• Use strong colors and dramatic lighting</li>
-                  <li>• Consider classic superhero poses</li>
-                </>
-              )}
-              {style === 'realistic' && (
-                <>
-                  <li>• Describe detailed lighting and shadows</li>
-                  <li>• Include specific facial features and expressions</li>
-                  <li>• Add environmental details for atmosphere</li>
-                </>
-              )}
-              <li>• Specify any particular art style you want</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Preview Section */}
-        <div className="lg:border-l lg:border-gray-100 lg:pl-8">
-          <div className="sticky top-24">
-            {/* Layout toggle */}
-            <div className="flex justify-end mb-4 gap-2">
-              {/* Save options - Only show when panels are generated */}
-              {generatedPanels.length > 0 && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-1 flex gap-1">
-                  <button
-                    onClick={() => handleSave('grid')}
-                    className="p-1.5 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1"
-                    title="Save all panels"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="text-sm">Save All</span>
-                  </button>
-                  <button
-                    onClick={() => handleSave('single')}
-                    className="p-1.5 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-50 flex items-center gap-1"
-                    title="Save current panel"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="text-sm">Save Panel</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Existing layout toggle */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-1 flex gap-1">
-                <button
-                  onClick={() => setIsGridLayout(true)}
-                  className={`p-1.5 rounded ${
-                    isGridLayout 
-                      ? 'bg-gray-100 text-gray-900' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  title="Grid layout"
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setIsGridLayout(false)}
-                  className={`p-1.5 rounded ${
-                    !isGridLayout 
-                      ? 'bg-gray-100 text-gray-900' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  title="Single column layout"
-                >
-                  <AlignJustify className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Panels container with dynamic layout */}
-            <div className="w-full">
-              {isGenerating ? (
-                <div className="space-y-6">
-                  <div className="text-center space-y-2 mb-8">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Creating your comic
-                    </h3>
-                    <p className="text-sm text-gray-500 animate-loading-text">
-                      Generating a {panels}-panel comic page...
-                    </p>
-                  </div>
-
-                  {/* Single loading panel */}
-                  <div className="w-full max-w-4xl mx-auto">
-                    <LoadingPanel index={0} total={1} />
-                  </div>
-                </div>
-              ) : generatedPanels.length > 0 ? (
-                // Generated panels with correct layout
-                <div className={`grid ${getLayoutClass(panels, isGridLayout)} w-full max-w-4xl gap-4 mx-auto`}>
-                  {generatedPanels.map((panel, i) => (
-                    <div 
-                      key={i} 
-                      data-panel={i}
-                      className="relative group bg-white rounded-lg shadow-sm"
-                      onClick={() => setSelectedPanel(i)}
-                      style={{ 
-                        isolation: 'isolate',
-                        transform: 'none',
-                        position: 'relative',
-                        overflow: 'visible'
-                      }}
+              {/* Style Options */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Style
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {['manga', 'comic', 'realistic'].map((styleOption) => (
+                    <Button
+                      key={styleOption}
+                      variant={style === styleOption ? 'default' : 'outline'}
+                      onClick={() => setStyle(styleOption)}
+                      className={`h-8 text-xs font-medium ${
+                        style === styleOption 
+                          ? 'bg-gray-900 text-white hover:bg-gray-800'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700'
+                      } transition-all duration-150`}
                     >
-                      {/* Image */}
-                      <Image
-                        src={panel.url}
-                        alt="Comic page"
-                        width={1024}
-                        height={1024}
-                        className="w-full h-auto rounded-lg"
-                      />
-
-                      {/* Add buttons - Updated positioning and visibility */}
-                      <div className="absolute top-2 right-2 flex gap-1 z-20">
-                        <button
-                          onClick={() => addDialogue(i)}
-                          className="p-1.5 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
-                          title="Add dialogue bubble"
-                        >
-                          <MessageCircle className="w-4 h-4 text-gray-600" />
-                        </button>
-                        <button
-                          onClick={() => addThought(i)}
-                          className="p-1.5 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
-                          title="Add thought bubble"
-                        >
-                          <Brain className="w-4 h-4 text-gray-600" />
-                        </button>
-                      </div>
-
-                      {/* Dialogue bubbles container */}
-                      <div className="absolute inset-0">
-                        {panel.dialogues?.map((dialogue, dialogueIndex) => (
-                          <div key={`dialogue-${dialogueIndex}`} className="absolute inset-0">
-                            <SpeechBubble 
-                              text={dialogue.text}
-                              style={dialogue.style}
-                              position={dialogue.position}
-                              type="dialogue"
-                              panelIndex={i}
-                              bubbleIndex={dialogueIndex}
-                              isSelected={selectedBubble?.panelIndex === i && 
-                                         selectedBubble?.type === 'dialogue' && 
-                                         selectedBubble?.bubbleIndex === dialogueIndex}
-                              onSelect={() => setSelectedBubble({
-                                panelIndex: i,
-                                type: 'dialogue',
-                                bubbleIndex: dialogueIndex
-                              })}
-                              onDelete={() => {
-                                deleteBubble(i, 'dialogue', dialogueIndex);
-                                setSelectedBubble(null);
-                              }}
-                              onDragEnd={(coords) => {
-                                const updatedPanels = [...generatedPanels];
-                                updatedPanels[i].dialogues[dialogueIndex].position = coords;
-                                setGeneratedPanels(updatedPanels);
-                              }}
-                              onTextChange={(newText) => {
-                                const updatedPanels = [...generatedPanels];
-                                updatedPanels[i].dialogues[dialogueIndex].text = newText;
-                                setGeneratedPanels(updatedPanels);
-                              }}
-                            />
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteBubble(i, 'dialogue', dialogueIndex);
-                                setSelectedBubble(null);
-                              }}
-                              className="delete-button absolute -top-2 -right-2 p-1 bg-white rounded-full 
-                                         shadow-sm hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Delete bubble"
-                            >
-                              <Trash2 className="w-3 h-3 text-red-500" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Thought bubbles container */}
-                      <div className="absolute inset-0">
-                        {panel.thoughts?.map((thought, thoughtIndex) => (
-                          <div key={`thought-${thoughtIndex}`} className="absolute inset-0">
-                            <SpeechBubble 
-                              text={thought.text}
-                              style={thought.style}
-                              position={thought.position}
-                              type="thought"
-                              panelIndex={i}
-                              bubbleIndex={thoughtIndex}
-                              isSelected={selectedBubble?.panelIndex === i && 
-                                         selectedBubble?.type === 'thought' && 
-                                         selectedBubble?.bubbleIndex === thoughtIndex}
-                              onSelect={() => setSelectedBubble({
-                                panelIndex: i,
-                                type: 'thought',
-                                bubbleIndex: thoughtIndex
-                              })}
-                              onDelete={() => {
-                                deleteBubble(i, 'thought', thoughtIndex);
-                                setSelectedBubble(null);
-                              }}
-                              onDragEnd={(coords) => {
-                                const updatedPanels = [...generatedPanels];
-                                updatedPanels[i].thoughts[thoughtIndex].position = coords;
-                                setGeneratedPanels(updatedPanels);
-                              }}
-                              onTextChange={(newText) => {
-                                const updatedPanels = [...generatedPanels];
-                                updatedPanels[i].thoughts[thoughtIndex].text = newText;
-                                setGeneratedPanels(updatedPanels);
-                              }}
-                            />
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteBubble(i, 'thought', thoughtIndex);
-                                setSelectedBubble(null);
-                              }}
-                              className="delete-button absolute -top-2 -right-2 p-1 bg-white rounded-full 
-                                         shadow-sm hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Delete bubble"
-                            >
-                              <Trash2 className="w-3 h-3 text-red-500" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                      {styleOption.charAt(0).toUpperCase() + styleOption.slice(1)}
+                    </Button>
                   ))}
                 </div>
+              </div>
+
+              {/* Generate Button */}
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating || !prompt.trim()}
+                className={`w-full h-9 text-xs font-medium ${
+                  isGenerating || !prompt.trim()
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white'
+                } transition-colors duration-150`}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Drawing your story...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                    Generate
+                  </>
+                )}
+              </Button>
+
+              {error && (
+                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-md">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Preview Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Preview</h2>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setLayout(layout === 'grid' ? 'row' : 'grid')}
+                  variant="outline"
+                  className="h-8 text-xs font-medium"
+                >
+                  {layout === 'grid' ? <LayoutGrid className="w-4 h-4" /> : <LayoutList className="w-4 h-4" />}
+                </Button>
+                {generatedPanels.length > 0 && generatedPanels[0].url && (
+                  <Button 
+                    onClick={handleSave} 
+                    variant="outline"
+                    className="h-8 text-xs font-medium"
+                  >
+                    <Download className="mr-1.5 h-3.5 w-3.5" />
+                    Save comic
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 min-h-[600px] border border-gray-100">
+              {isGenerating ? (
+                <div className="space-y-4">
+                  <div className="text-center space-y-1">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      Creating your masterpiece
+                    </h3>
+                    <p className="text-xs text-gray-500 animate-pulse">
+                      {[
+                        "Drawing panel details...",
+                        "Maintaining consistency...",
+                        "Perfecting the scenes...",
+                        "Almost there..."
+                      ][Math.floor((Date.now() / 2000) % 4)]}
+                    </p>
+                  </div>
+                  <div className={`grid ${getLayoutClass(panels, layout)}`}>
+                    {Array(panels).fill(0).map((_, i) => (
+                      <LoadingPanel key={i} />
+                    ))}
+                  </div>
+                </div>
               ) : (
-                // Empty state with same layout options
-                <div className={`grid ${getLayoutClass(panels, isGridLayout)} w-full max-w-4xl gap-4 mx-auto`}>
-                  {Array.from({ length: panels }).map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`aspect-square bg-gray-50 rounded-lg flex items-center justify-center ${
-                        panels === 3 && i === 2 && isGridLayout ? 'col-start-1 row-start-2' : ''
-                      }`}
+                <div className={`comic-container ${getLayoutClass(panels, layout)}`}>
+                  {generatedPanels.map((panel, i) => (
+                    <div
+                      key={i}
+                      className={`relative ${
+                        layout === 'row' ? 'w-full' : 
+                        panels === 3 && i === 2 ? 'col-span-2' : ''
+                      } aspect-square bg-white rounded-md shadow-sm border border-gray-100`}
                     >
-                      <p className="text-sm text-gray-500">Panel {i + 1}</p>
+                      {panel.url ? (
+                        <>
+                          <ComicImage
+                            src={panel.url}
+                            alt={`Comic panel ${i + 1}`}
+                            width={1024}
+                            height={1024}
+                          />
+
+                          {/* Add bubble controls */}
+                          <div className="absolute top-2 right-2 flex gap-1.5 z-20 bubble-controls">
+                            <button
+                              onClick={() => addDialogue(i)}
+                              className="p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                              title="Add dialogue bubble"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5 text-gray-600" />
+                            </button>
+                            <button
+                              onClick={() => addThought(i)}
+                              className="p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                              title="Add thought bubble"
+                            >
+                              <Brain className="w-3.5 h-3.5 text-gray-600" />
+                            </button>
+                          </div>
+
+                          {/* Dialogue bubbles container */}
+                          <div className="absolute inset-0">
+                            {panel.dialogues?.map((dialogue, dialogueIndex) => (
+                              <SpeechBubble 
+                                key={`dialogue-${dialogueIndex}`}
+                                text={dialogue.text}
+                                style={dialogue.style}
+                                position={dialogue.position}
+                                type="dialogue"
+                                panelIndex={i}
+                                bubbleIndex={dialogueIndex}
+                                isSelected={selectedBubble?.panelIndex === i && 
+                                           selectedBubble?.type === 'dialogue' && 
+                                           selectedBubble?.bubbleIndex === dialogueIndex}
+                                onSelect={() => setSelectedBubble({
+                                  panelIndex: i,
+                                  type: 'dialogue',
+                                  bubbleIndex: dialogueIndex
+                                })}
+                                onDelete={() => {
+                                  deleteBubble(i, 'dialogue', dialogueIndex);
+                                  setSelectedBubble(null);
+                                }}
+                                onDragEnd={(coords) => {
+                                  const updatedPanels = [...generatedPanels];
+                                  updatedPanels[i].dialogues[dialogueIndex].position = coords;
+                                  setGeneratedPanels(updatedPanels);
+                                }}
+                                onTextChange={(newText) => {
+                                  const updatedPanels = [...generatedPanels];
+                                  updatedPanels[i].dialogues[dialogueIndex].text = newText;
+                                  setGeneratedPanels(updatedPanels);
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Thought bubbles container */}
+                          <div className="absolute inset-0">
+                            {panel.thoughts?.map((thought, thoughtIndex) => (
+                              <SpeechBubble 
+                                key={`thought-${thoughtIndex}`}
+                                text={thought.text}
+                                style={thought.style}
+                                position={thought.position}
+                                type="thought"
+                                panelIndex={i}
+                                bubbleIndex={thoughtIndex}
+                                isSelected={selectedBubble?.panelIndex === i && 
+                                           selectedBubble?.type === 'thought' && 
+                                           selectedBubble?.bubbleIndex === thoughtIndex}
+                                onSelect={() => setSelectedBubble({
+                                  panelIndex: i,
+                                  type: 'thought',
+                                  bubbleIndex: thoughtIndex
+                                })}
+                                onDelete={() => {
+                                  deleteBubble(i, 'thought', thoughtIndex);
+                                  setSelectedBubble(null);
+                                }}
+                                onDragEnd={(coords) => {
+                                  const updatedPanels = [...generatedPanels];
+                                  updatedPanels[i].thoughts[thoughtIndex].position = coords;
+                                  setGeneratedPanels(updatedPanels);
+                                }}
+                                onTextChange={(newText) => {
+                                  const updatedPanels = [...generatedPanels];
+                                  updatedPanels[i].thoughts[thoughtIndex].text = newText;
+                                  setGeneratedPanels(updatedPanels);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <p className="text-xs text-gray-400">
+                            Panel {i + 1}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
