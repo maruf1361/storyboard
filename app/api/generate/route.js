@@ -11,74 +11,70 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Update the story prompt to be more intelligent
 const getStoryPrompt = (prompt) => ({
   role: "system",
-  content: `You are a visual storytelling expert. Create PURELY VISUAL scenes with NO TEXT OR DIALOGUE.
+  content: `You are a visual storytelling expert. Convert user's story into PURELY VISUAL sequential scenes.
+Return your response as a JSON object with the following structure.
 
 CRITICAL RULES:
-1. ABSOLUTELY NO TEXT OR DIALOGUE - Pure visual storytelling only
-2. Each scene must be purely visual - NO speech bubbles, NO text boxes
-3. Focus on facial expressions and body language to convey meaning
-4. Only use details explicitly stated in prompt
-5. Characters must maintain EXACT same appearance in every panel
-6. Environment must be perfectly consistent between panels
+1. ABSOLUTELY NO TEXT OR DIALOGUE
+2. Each panel must be a clear, distinct scene
+3. Characters must be visually distinguishable
+4. Each character must maintain exact appearance across all panels
+5. Story must follow logical visual progression
+6. Environment must stay consistent within same location
 
-Parse this prompt into JSON with this structure:
+REQUIRED JSON STRUCTURE:
 {
   "characters": {
     "allCharacters": [
       {
-        "name": "EXACTLY as mentioned in prompt",
-        "role": "EXACTLY as mentioned in prompt",
-        "gender": "EXACTLY as mentioned or 'not specified'",
-        "age": "EXACTLY as mentioned or 'not specified'",
+        "identifier": "unique visual trait to distinguish this character",
+        "role": "character's role in story",
         "physicalTraits": {
-          "build": "EXACTLY as mentioned or 'not specified'",
-          "skinTone": "EXACTLY as mentioned or 'not specified'",
-          "distinguishingFeatures": "EXACTLY as mentioned or 'not specified'"
+          "build": "distinctive body type",
+          "height": "relative to other characters",
+          "distinguishingFeatures": "unique visual elements"
         },
         "face": {
-          "shape": "EXACTLY as mentioned or 'not specified'",
-          "eyes": "EXACTLY as mentioned or 'not specified'",
-          "nose": "EXACTLY as mentioned or 'not specified'",
-          "mouth": "EXACTLY as mentioned or 'not specified'",
-          "hair": "EXACTLY as mentioned or 'not specified'"
+          "shape": "distinctive face shape",
+          "eyes": "unique eye characteristics",
+          "hair": "distinctive hairstyle and color",
+          "uniqueFeatures": "any distinguishing facial features"
         },
         "clothing": {
-          "mainOutfit": "EXACTLY as mentioned or 'not specified'",
-          "accessories": "EXACTLY as mentioned or 'not specified'"
+          "mainOutfit": "distinctive outfit description",
+          "uniqueAccessories": "character-specific items"
         }
       }
     ]
   },
   "setting": {
-    "environment": "EXACTLY as mentioned or 'not specified'",
-    "lighting": "EXACTLY as mentioned or 'not specified'",
-    "timeOfDay": "EXACTLY as mentioned or 'not specified'",
-    "weather": "EXACTLY as mentioned or 'not specified'",
-    "props": "EXACTLY as mentioned or 'not specified'",
-    "architecture": "EXACTLY as mentioned or 'not specified'"
+    "environment": "detailed scene description",
+    "timeOfDay": "specific lighting condition",
+    "weather": "atmospheric conditions",
+    "keyObjects": "important scene elements"
   },
   "panels": [
     {
-      "panelNumber": "panel number",
-      "description": "COPY EXACT panel description from prompt",
-      "characters": ["EXACTLY which characters appear in this panel"],
-      "actions": {
-        "characterName": "EXACT action described for this character"
+      "panelNumber": "sequential number",
+      "scene": "clear visual description",
+      "presentCharacters": ["which characters appear"],
+      "characterActions": {
+        "characterIdentifier": "specific visual action"
       },
-      "composition": "EXACTLY as mentioned or 'not specified'"
+      "sceneComposition": "how the scene is framed"
     }
   ]
 }
 
-CRITICAL INSTRUCTIONS:
-1. Choose optimal number of panels (2-4) based on story complexity
-2. Each panel must advance story visually
-3. NO dialogue or text elements
-4. Keep character details consistent
-5. Use only explicitly stated details
+PANEL GUIDELINES:
+1. Each panel must show clear story progression
+2. Characters must be instantly recognizable
+3. Actions must be clearly visible
+4. Scenes must be well-composed
+5. Important story elements must be prominent
 
-USER'S PROMPT: "${prompt}"
-Parse this prompt EXACTLY and create a JSON response with ONLY explicitly stated details. NO TEXT OR DIALOGUE ELEMENTS.`
+USER PROMPT: "${prompt}"
+Parse this prompt and return a JSON object that creates a visual narrative without any text or dialogue.`
 });
 
 // Add panel count validation to safeJSONParse
@@ -132,95 +128,80 @@ const safeJSONParse = (content, expectedPanels) => {
 // Remove generateImages function and modify generateImage to create a single multi-panel image
 const generateImage = async (story, style) => {
   const panels = story.panels.length;
-  const mainChar = story.characters.allCharacters[0];
+  const characters = story.characters.allCharacters;
   
-  const styleGuide = {
+  const artStyle = {
     manga: `
-* PURE VISUAL MANGA STYLE:
-* NO TEXT OR DIALOGUE WHATSOEVER
-* NO speech bubbles or text boxes
-* NO sound effects or onomatopoeia
-* NO background text or signs
-* Pure black and white art style
-* Sharp, clean black linework
-* High contrast shadows using screentone
-* Dynamic speed lines for movement
-* Dramatic camera angles
-* Expressive faces to convey emotion
-* Strong shadow placement
+* Pure black and white art with high contrast
+* Distinctive character designs
+* Clear visual storytelling
+* Dynamic compositions
+* Expressive character poses
 * Detailed backgrounds
-* Classic manga proportions`,
+* NO text or speech bubbles`,
     
     comic: `
-* Bold American comic book style
-* Strong, defined outlines
-* Vibrant, saturated colors
-* Dynamic action poses
-* Dramatic lighting and shadows
-* Heroic character proportions
-* Rich color gradients
-* Detailed environmental effects
-* Classic comic book rendering
-* Western art composition`,
+* Bold color palette
+* Clear character distinctions
+* Strong visual narrative
+* Dynamic action scenes
+* Expressive character poses
+* Detailed environments
+* NO text or speech bubbles`,
     
     realistic: `
-* Photorealistic rendering
-* Natural lighting and shadows
-* Accurate human proportions
-* Detailed facial features
-* Real-world textures
-* Subtle color palette
-* Accurate environmental details
-* Realistic material rendering
-* Natural pose dynamics
-* Cinematic composition`
+* Natural lighting and colors
+* Realistic character features
+* Clear visual storytelling
+* Natural compositions
+* Lifelike expressions
+* Detailed settings
+* NO text or speech bubbles`
   }[style];
 
-  const prompt = `Create a ${panels}-panel PURELY VISUAL manga sequence. ABSOLUTELY NO TEXT OF ANY KIND.
+  const characterDescriptions = characters.map(char => `
+Character "${char.identifier}":
+- Appearance: ${char.physicalTraits.distinguishingFeatures}
+- Face: ${char.face.uniqueFeatures}
+- Hair: ${char.face.hair}
+- Outfit: ${char.clothing.mainOutfit}
+- Accessories: ${char.clothing.uniqueAccessories}
+MUST REMAIN 100% IDENTICAL IN ALL APPEARANCES`).join('\n');
 
-STRICT RULES - NO EXCEPTIONS:
-1. NO TEXT ANYWHERE - Not even a single letter or number
-2. NO speech bubbles or dialogue boxes
-3. NO sound effects or written sounds
-4. NO signs, posters, or written content in backgrounds
-5. NO logos or brand names
-6. NO graffiti or markings
-7. Pure visual storytelling through expressions and actions only
+  const prompt = `Create a ${panels}-panel visual story.
 
-CHARACTER CONSISTENCY (EXACT COPY BETWEEN PANELS):
-Face (100% IDENTICAL):
-- Shape: ${mainChar.face.shape || 'not specified'} (copy EXACTLY)
-- Eyes: ${mainChar.face.eyes || 'not specified'} (duplicate PRECISELY)
-- Nose: ${mainChar.face.nose || 'not specified'} (match PERFECTLY)
-- Mouth: ${mainChar.face.mouth || 'not specified'} (replicate EXACTLY)
-- Hair: ${mainChar.face.hair || 'not specified'} (copy EVERY detail)
+STYLE GUIDE:
+${artStyle}
 
-Clothing (PERFECT MATCH):
-- Outfit: ${mainChar.clothing.mainOutfit || 'not specified'} (duplicate ALL details)
-- Every fold and wrinkle must match exactly
-- All patterns and designs must be identical
-- Accessories must be in same exact position
+CHARACTERS (MUST STAY CONSISTENT):
+${characterDescriptions}
 
-ENVIRONMENT (100% CONSISTENT):
-- Setting: ${story.setting.environment || 'not specified'} (copy exactly)
-- Time: ${story.setting.timeOfDay || 'not specified'} (same lighting)
-- Weather: ${story.setting.weather || 'not specified'} (identical effects)
-- Every background element must stay in same position
+SETTING:
+- Environment: ${story.setting.environment}
+- Time: ${story.setting.timeOfDay}
+- Weather: ${story.setting.weather}
+- Key Elements: ${story.setting.keyObjects}
 
-VISUAL SEQUENCE:
+STORY PANELS:
 ${story.panels.map((panel, index) => `
-PANEL ${index + 1} - PURE VISUAL STORYTELLING:
-Scene: ${panel.description}
-Action: ${Object.values(panel.actions).join(', ')}
-Composition: ${panel.composition || 'not specified'}
-`).join('\n')}
+PANEL ${index + 1}:
+Scene: ${panel.scene}
+Present: ${panel.presentCharacters.join(', ')}
+Actions: ${Object.entries(panel.characterActions).map(([char, action]) => `${char}: ${action}`).join(', ')}
+Composition: ${panel.sceneComposition}
+NOTE: Characters must be instantly recognizable and identical to other panels`).join('\n')}
 
-FINAL VERIFICATION:
-- Double check NO text appears anywhere
-- Verify character features are pixel-perfect copies
-- Confirm clothing details match exactly
-- Ensure backgrounds are perfectly consistent
-- Check NO accidental text or symbols appear`;
+CRITICAL REQUIREMENTS:
+1. NO text, speech bubbles, or written elements
+2. Each character must be visually distinct
+3. Characters must be 100% consistent between panels
+4. Each panel must clearly show the story progression
+5. Maintain exact same character designs throughout
+6. Keep environment consistent within same location
+7. Make characters instantly recognizable
+8. Do not add any text or dialogue. No speech bubbles.
+
+IMPORTANT: Pure visual storytelling only - NO text elements of any kind.`;
 
   return openai.images.generate({
     model: "dall-e-3",

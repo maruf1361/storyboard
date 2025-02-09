@@ -282,6 +282,25 @@ const SpeechBubble = ({
     zIndex: 5,
   };
 
+  // Update the text style in the SpeechBubble component
+  const textStyle = {
+    wordBreak: 'break-word',
+    width: '100%',
+    textAlign: type === 'thought' ? 'center' : 'left',
+    fontSize: type === 'thought' ? '0.65rem' : '0.75rem',
+    fontFamily: style === 'manga' ? 
+      '"Bangers", "Comic Sans MS", cursive' : 
+      style === 'comic' ? 
+      '"Comic Neue", "Comic Sans MS", cursive' :
+      '"Permanent Marker", "Comic Sans MS", cursive',
+    letterSpacing: style === 'whisper' ? '0.05em' : '0.025em',
+    lineHeight: '1.1',
+    fontWeight: style === 'shout' ? 700 : 400,
+    textTransform: style === 'shout' ? 'uppercase' : 'none',
+    // Add slight text shadow for better readability
+    textShadow: style === 'shout' ? '0.5px 0.5px 0px rgba(0,0,0,0.2)' : 'none',
+  };
+
   return (
     <div
       ref={bubbleRef}
@@ -309,17 +328,7 @@ const SpeechBubble = ({
           }}
         />
       ) : (
-        <div 
-          style={{ 
-            wordBreak: 'break-word',
-            width: '100%',
-            textAlign: type === 'thought' ? 'center' : 'left',
-            fontSize: type === 'thought' ? '0.65rem' : '0.75rem',
-            fontFamily: 'Comic Neue, "Comic Sans MS", cursive',
-            letterSpacing: '0.025em',
-            lineHeight: '1.1',
-          }}
-        >
+        <div style={textStyle}>
           {text}
         </div>
       )}
@@ -359,11 +368,98 @@ const capturePanel = async (panelIndex) => {
       scale: 2, // Higher quality
       logging: false,
       onclone: (clonedDoc) => {
-        // Ensure Next.js images are loaded in clone
-        const images = clonedDoc.getElementsByTagName('img');
-        Array.from(images).forEach(img => {
-          if (img.dataset.src) {
-            img.src = img.dataset.src;
+        // Hide controls
+        const controlButtons = clonedDoc.querySelectorAll('.bubble-controls');
+        controlButtons.forEach(button => {
+          button.style.display = 'none';
+        });
+
+        // Handle bubbles
+        const bubbles = clonedDoc.querySelectorAll('[data-bubble]');
+        bubbles.forEach(bubble => {
+          const originalBubble = document.querySelector(
+            `[data-bubble="${bubble.dataset.bubble}"][style*="left: ${bubble.style.left}"]`
+          );
+          
+          if (originalBubble) {
+            const originalRect = originalBubble.getBoundingClientRect();
+            const originalStyle = window.getComputedStyle(originalBubble);
+            const bubbleType = bubble.dataset.bubble;
+            const style = originalBubble.getAttribute('data-style') || 'normal';
+            
+            // Set bubble styles
+            bubble.style.position = 'absolute';
+            bubble.style.left = originalBubble.style.left;
+            bubble.style.top = originalBubble.style.top;
+            bubble.style.transform = originalBubble.style.transform;
+            bubble.style.backgroundColor = 'white';
+            bubble.style.border = '1.5px solid #111827';
+            bubble.style.boxShadow = '1px 1px 0 rgba(17, 24, 39, 0.9)';
+            bubble.style.maxWidth = bubbleType === 'thought' ? '120px' : '25%';
+            bubble.style.minWidth = bubbleType === 'thought' ? '45px' : 'auto';
+            bubble.style.wordBreak = 'break-word';
+            bubble.style.whiteSpace = 'pre-wrap';
+            bubble.style.userSelect = 'none';
+            bubble.style.padding = bubbleType === 'thought' ? '0.5rem' : '0.35rem 0.5rem';
+
+            if (bubbleType === 'thought') {
+              bubble.style.aspectRatio = '1/1';
+              bubble.style.borderRadius = '50%';
+              bubble.style.display = 'flex';
+              bubble.style.alignItems = 'center';
+              bubble.style.justifyContent = 'center';
+              bubble.style.textAlign = 'center';
+            }
+
+            // Handle text content
+            const textElement = bubble.querySelector('div');
+            if (textElement) {
+              const originalText = originalBubble.querySelector('div');
+              const originalTextStyle = window.getComputedStyle(originalText);
+              
+              // Copy exact text styles and positioning from the original
+              textElement.style.cssText = originalTextStyle.cssText;
+              textElement.style.width = '100%';
+              textElement.style.wordBreak = 'break-word';
+              textElement.style.whiteSpace = 'pre-wrap';
+              textElement.style.margin = '0';
+              textElement.style.padding = '0';
+              
+              // Keep the original text alignment and display properties
+              textElement.style.display = originalTextStyle.display;
+              textElement.style.alignItems = originalTextStyle.alignItems;
+              textElement.style.justifyContent = originalTextStyle.justifyContent;
+              textElement.style.textAlign = originalTextStyle.textAlign;
+              
+              // Preserve font styles
+              textElement.style.fontFamily = style === 'manga' ? 
+                '"Bangers", "Comic Sans MS", cursive' : 
+                style === 'comic' ? 
+                '"Comic Neue", "Comic Sans MS", cursive' :
+                '"Permanent Marker", "Comic Sans MS", cursive';
+              textElement.style.fontSize = bubbleType === 'thought' ? '0.65rem' : '0.75rem';
+              textElement.style.lineHeight = '1.1';
+              textElement.style.fontWeight = style === 'shout' ? '700' : '400';
+              textElement.style.textTransform = style === 'shout' ? 'uppercase' : 'none';
+              textElement.style.letterSpacing = style === 'whisper' ? '0.05em' : '0.025em';
+              textElement.style.textShadow = style === 'shout' ? '0.5px 0.5px 0px rgba(0,0,0,0.2)' : 'none';
+            }
+
+            // Handle thought bubble indicators
+            if (bubbleType === 'thought') {
+              const indicators = bubble.querySelectorAll('div[style*="border-radius: 50%"]');
+              indicators.forEach((indicator, index) => {
+                indicator.style.position = 'absolute';
+                indicator.style.backgroundColor = 'white';
+                indicator.style.borderRadius = '50%';
+                indicator.style.border = '1.5px solid #111827';
+                indicator.style.width = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                indicator.style.height = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                indicator.style.bottom = index === 0 ? '-8px' : index === 1 ? '-12px' : '-15px';
+                indicator.style.left = '50%';
+                indicator.style.transform = 'translateX(-50%)';
+              });
+            }
           }
         });
       }
@@ -475,6 +571,16 @@ const DialogueTail = ({ angle }) => (
   </svg>
 );
 
+// Add font imports at the top of the file
+const fontImports = `
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Permanent+Marker&display=swap');
+`;
+
+// Add the imports to a style tag
+const styleTag = document.createElement('style');
+styleTag.textContent = fontImports;
+document.head.appendChild(styleTag);
+
 export default function CreatePage() {
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState('manga');
@@ -512,83 +618,82 @@ export default function CreatePage() {
             
             if (originalBubble) {
               const originalRect = originalBubble.getBoundingClientRect();
+              const originalStyle = window.getComputedStyle(originalBubble);
+              const bubbleType = bubble.dataset.bubble;
+              const style = originalBubble.getAttribute('data-style') || 'normal';
               
-              // Apply base styles with smaller dimensions
+              // Set bubble styles
               bubble.style.position = 'absolute';
               bubble.style.left = originalBubble.style.left;
               bubble.style.top = originalBubble.style.top;
               bubble.style.transform = originalBubble.style.transform;
-              bubble.style.fontFamily = 'Comic Neue, "Comic Sans MS", cursive';
-              bubble.style.border = '1.5px solid #111827';
               bubble.style.backgroundColor = 'white';
-              bubble.style.maxWidth = '25%'; // Reduced from original size
+              bubble.style.border = '1.5px solid #111827';
+              bubble.style.boxShadow = '1px 1px 0 rgba(17, 24, 39, 0.9)';
+              bubble.style.maxWidth = bubbleType === 'thought' ? '120px' : '25%';
+              bubble.style.minWidth = bubbleType === 'thought' ? '45px' : 'auto';
+              bubble.style.wordBreak = 'break-word';
+              bubble.style.whiteSpace = 'pre-wrap';
+              bubble.style.userSelect = 'none';
+              bubble.style.padding = bubbleType === 'thought' ? '0.5rem' : '0.35rem 0.5rem';
 
-              // Handle thought bubbles specifically
-              if (bubble.dataset.bubble === 'thought') {
-                const textContent = bubble.querySelector('div');
-                const text = textContent.textContent;
-                
-                // Set smaller dimensions for thought bubbles
-                const baseSize = Math.min(originalRect.width * 0.8, 100); // 80% of original, max 100px
-                bubble.style.width = `${baseSize}px`;
-                bubble.style.height = `${baseSize}px`;
+              if (bubbleType === 'thought') {
+                bubble.style.aspectRatio = '1/1';
                 bubble.style.borderRadius = '50%';
                 bubble.style.display = 'flex';
                 bubble.style.alignItems = 'center';
                 bubble.style.justifyContent = 'center';
-                bubble.style.padding = '0.35rem';
-                
-                // Style the text container
-                if (textContent) {
-                  textContent.style.width = '100%';
-                  textContent.style.textAlign = 'center';
-                  textContent.style.fontSize = '0.65rem';
-                  textContent.style.lineHeight = '1.1';
-                  textContent.style.wordBreak = 'break-word';
-                  textContent.style.whiteSpace = 'pre-wrap';
-                  textContent.style.margin = '0';
-                  textContent.style.padding = '0'; // Reset padding
-                  textContent.style.display = 'flex';
-                  textContent.style.alignItems = 'center';
-                  textContent.style.justifyContent = 'center';
-                  textContent.style.height = '100%';
-                }
+                bubble.style.textAlign = 'center';
+              }
 
-                // Handle thought indicators with smaller sizes
-                const indicators = originalBubble.querySelectorAll('div[style*="border-radius: 50%"]');
-                const clonedIndicators = bubble.querySelectorAll('div[style*="border-radius: 50%"]');
+              // Handle text content
+              const textElement = bubble.querySelector('div');
+              if (textElement) {
+                const originalText = originalBubble.querySelector('div');
+                const originalTextStyle = window.getComputedStyle(originalText);
                 
+                // Copy exact text styles and positioning from the original
+                textElement.style.cssText = originalTextStyle.cssText;
+                textElement.style.width = '100%';
+                textElement.style.wordBreak = 'break-word';
+                textElement.style.whiteSpace = 'pre-wrap';
+                textElement.style.margin = '0';
+                textElement.style.padding = '0';
+                
+                // Keep the original text alignment and display properties
+                textElement.style.display = originalTextStyle.display;
+                textElement.style.alignItems = originalTextStyle.alignItems;
+                textElement.style.justifyContent = originalTextStyle.justifyContent;
+                textElement.style.textAlign = originalTextStyle.textAlign;
+                
+                // Preserve font styles
+                textElement.style.fontFamily = style === 'manga' ? 
+                  '"Bangers", "Comic Sans MS", cursive' : 
+                  style === 'comic' ? 
+                  '"Comic Neue", "Comic Sans MS", cursive' :
+                  '"Permanent Marker", "Comic Sans MS", cursive';
+                textElement.style.fontSize = bubbleType === 'thought' ? '0.65rem' : '0.75rem';
+                textElement.style.lineHeight = '1.1';
+                textElement.style.fontWeight = style === 'shout' ? '700' : '400';
+                textElement.style.textTransform = style === 'shout' ? 'uppercase' : 'none';
+                textElement.style.letterSpacing = style === 'whisper' ? '0.05em' : '0.025em';
+                textElement.style.textShadow = style === 'shout' ? '0.5px 0.5px 0px rgba(0,0,0,0.2)' : 'none';
+              }
+
+              // Handle thought bubble indicators
+              if (bubbleType === 'thought') {
+                const indicators = bubble.querySelectorAll('div[style*="border-radius: 50%"]');
                 indicators.forEach((indicator, index) => {
-                  if (clonedIndicators[index]) {
-                    clonedIndicators[index].style.position = 'absolute';
-                    clonedIndicators[index].style.borderRadius = '50%';
-                    clonedIndicators[index].style.backgroundColor = 'white';
-                    clonedIndicators[index].style.border = '1.5px solid #111827';
-                    clonedIndicators[index].style.width = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
-                    clonedIndicators[index].style.height = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
-                    clonedIndicators[index].style.bottom = index === 0 ? '-8px' : index === 1 ? '-12px' : '-15px';
-                    clonedIndicators[index].style.left = '50%';
-                    clonedIndicators[index].style.transform = 'translateX(-50%)';
-                  }
+                  indicator.style.position = 'absolute';
+                  indicator.style.backgroundColor = 'white';
+                  indicator.style.borderRadius = '50%';
+                  indicator.style.border = '1.5px solid #111827';
+                  indicator.style.width = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                  indicator.style.height = index === 0 ? '4px' : index === 1 ? '3px' : '2px';
+                  indicator.style.bottom = index === 0 ? '-8px' : index === 1 ? '-12px' : '-15px';
+                  indicator.style.left = '50%';
+                  indicator.style.transform = 'translateX(-50%)';
                 });
-              } else {
-                // Handle regular dialogue bubbles with smaller dimensions
-                const width = Math.min(originalRect.width * 0.8, originalRect.width); // 80% of original width
-                bubble.style.width = `${width}px`;
-                bubble.style.height = 'auto';
-                bubble.style.padding = '0.35rem 0.5rem';
-                bubble.style.borderRadius = '0.5rem';
-
-                const textElement = bubble.querySelector('div');
-                if (textElement) {
-                  textElement.style.width = '100%';
-                  textElement.style.textAlign = 'left';
-                  textElement.style.fontSize = '0.65rem';
-                  textElement.style.lineHeight = '1.1';
-                  textElement.style.wordBreak = 'break-word';
-                  textElement.style.whiteSpace = 'pre-wrap';
-                  textElement.style.fontFamily = 'Comic Neue, "Comic Sans MS", cursive';
-                }
               }
             }
           });
