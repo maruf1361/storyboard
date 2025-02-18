@@ -32,21 +32,21 @@ export default function Navbar() {
             >
               Examples
             </Link>
-            <Link 
+            {/* <Link 
               href="/pricing" 
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Pricing
-            </Link>
+            </Link> */}
             
-            <Button 
+            {/* <Button 
               size="sm" 
               variant="outline"
               className="text-sm border-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
               asChild
             >
               <Link href="/login">Log in</Link>
-            </Button>
+            </Button> */}
             <Button 
               size="sm" 
               className="bg-black hover:bg-gray-900 text-white text-sm rounded"
